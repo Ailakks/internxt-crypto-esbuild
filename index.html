@@ -1,0 +1,11 @@
+<html lang="es">
+    <head>
+        <script src="dist/index.js"></script>
+        <title>Internxt</title>
+    </head>
+    <body>
+        <script>
+            Internxt.Auth.client('https://api.internxt.com/drive', { clientName: 'internxt web', clientVersion: '1.0' }).login({ email: '', password: '', tfaCode: '' }, Internxt.cryptoProvider).then((data) => console.log(data));
+        </script>
+    </body>
+</html>

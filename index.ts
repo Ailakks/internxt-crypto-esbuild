@@ -116,4 +116,4 @@ const cryptoProvider = {
     },
 };
 
-export { Auth };
+export { Auth, cryptoProvider };
