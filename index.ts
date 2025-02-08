@@ -1,6 +1,5 @@
 import CryptoJS from 'crypto-js';
-import {aes} from '@internxt/lib';
-import {Auth, type CryptoProvider} from "@internxt/sdk";
+import { aes } from '@internxt/lib';
 import kemBuilder from '@dashlane/pqc-kem-kyber512-browser';
 
 export function getAesInitFromEnv(): { iv: string; salt: string } {
@@ -112,12 +111,6 @@ const cryptoProvider = {
         return encryptText(hashObj.hash);
     },
     async generateKeys(password) {
-        const { privateKeyArmoredEncrypted, publicKeyArmored, revocationCertificate } = await generateNewKeysWithEncrypted(password);
-
-        return {
-            privateKeyEncrypted: privateKeyArmoredEncrypted,
-            publicKey: publicKeyArmored,
-            revocationCertificate: revocationCertificate,
-        };
+        return getKeys(password);
     },
 };
