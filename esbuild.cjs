@@ -9,10 +9,14 @@ esbuild.build({
   platform: 'browser',
   format: 'iife',
   define: {
-    'import.meta.url': '"https://drive.internxt.com/login"'
+    'import.meta.url': '"https://drive.internxt.com/login"',
+    'global': 'window'
   },
   alias: {
-    crypto: 'crypto-browserify'
+    crypto: 'crypto-browserify',
+    stream: 'stream-browserify'
   },
-  external: ['buffer', 'events', 'stream', 'fs', 'path']
+  external: ['events', 'fs', 'path'],
+  inject: [require.resolve('buffer')],
+  minify: true
 }).catch(() => process.exit(1));
