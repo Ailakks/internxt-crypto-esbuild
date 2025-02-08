@@ -1,23 +1,26 @@
 const esbuild = require('esbuild');
+const { nodeModulesPolyfillPlugin } = require('esbuild-plugins-node-modules-polyfill');
 
 esbuild.build({
   entryPoints: ['./index.ts'],
   bundle: true,
   outfile: './dist/index.js',
   globalName: 'Internxt',
-  plugins: [],
   platform: 'browser',
   format: 'iife',
   define: {
     'import.meta.url': '"https://drive.internxt.com/login"',
     'global': 'window'
   },
+  plugins: [
+    nodeModulesPolyfillPlugin({ fallback: 'none', globals: { Buffer: true, process: true }, modules: { crypto: false, fs: true, path: true } })
+  ],
   alias: {
     crypto: 'crypto-browserify',
     stream: 'stream-browserify',
-    process: 'process/browser'
+    'node:buffer': 'buffer',
+    'node:process': 'process'
   },
-  external: ['fs', 'path'],
   inject: [],
   minify: true
 }).catch(() => process.exit(1));
