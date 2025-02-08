@@ -14,9 +14,10 @@ esbuild.build({
   },
   alias: {
     crypto: 'crypto-browserify',
-    stream: 'stream-browserify'
+    stream: 'stream-browserify',
+    process: 'process/browser'
   },
-  external: ['events', 'fs', 'path'],
-  inject: [require.resolve('buffer')],
+  external: ['fs', 'path'],
+  inject: [],
   minify: true
 }).catch(() => process.exit(1));
