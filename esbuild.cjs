@@ -1,5 +1,5 @@
 const esbuild = require('esbuild');
-const {polyfillNode} = require('esbuild-plugin-polyfill-node');
+const { polyfillNode } = require('esbuild-plugin-polyfill-node');
 
 esbuild.build({
   entryPoints: ['./index.ts'],
@@ -9,5 +9,7 @@ esbuild.build({
   plugins: [polyfillNode()],
   platform: 'browser',
   format: 'iife',
-  define: {}
+  define: {
+    'import.meta.url': '"https://drive.internxt.com/login"'
+  }
 }).catch(() => process.exit(1));

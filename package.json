@@ -1,7 +1,6 @@
 {
   "name": "crypto",
   "module": "index.ts",
-  "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -11,7 +10,6 @@
   "dependencies": {
     "@dashlane/pqc-kem-kyber512-browser": "^1.0.0",
     "@internxt/lib": "^1.2.1",
-    "@internxt/sdk": "^1.9.7",
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
     "esbuild": "^0.25.0",
