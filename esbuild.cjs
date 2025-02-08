@@ -13,14 +13,15 @@ esbuild.build({
     'global': 'window'
   },
   plugins: [
-    nodeModulesPolyfillPlugin({ fallback: 'none', globals: { Buffer: true, process: true }, modules: { crypto: false, fs: true, path: true } })
+    nodeModulesPolyfillPlugin({ fallback: 'none', globals: { Buffer: true, process: true }, modules: { crypto: false } })
   ],
   alias: {
     crypto: 'crypto-browserify',
     stream: 'stream-browserify',
+    path: 'path-browserify',
     'node:buffer': 'buffer',
     'node:process': 'process'
   },
-  inject: [],
-  minify: true
+  external: ['fs'],
+  minify: true,
 }).catch(() => process.exit(1));
