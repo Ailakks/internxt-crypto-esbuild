@@ -12,6 +12,7 @@
     "@internxt/lib": "^1.2.1",
     "@internxt/sdk": "^1.9.7",
     "@types/crypto-js": "^4.2.2",
+    "craco": "^0.0.3",
     "crypto-browserify": "^3.12.1",
     "esbuild": "^0.25.0",
     "esbuild-plugin-polyfill-node": "^0.3.0",
@@ -20,6 +21,20 @@
     "openpgp": "^5.9.0",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "webpack-bundle-analyzer": "^4.10.2",
+    "webpack-cli": "^6.0.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

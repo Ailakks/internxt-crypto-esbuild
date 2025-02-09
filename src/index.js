@@ -6,21 +6,15 @@ import { Buffer } from 'buffer';
 
 globalThis.Buffer = Buffer;
 
-export function getAesInitFromEnv(): { iv: string; salt: string } {
+export function getAesInitFromEnv() {
     return { iv: "d139cb9a2cd17092e79e1861cf9d7023", salt: "38dce0391b49efba88dbc8c39ebf868f0267eb110bb0012ab27dc52a528d61b1d1ed9d76f400ff58e3240028442b1eab9bb84e111d9dadd997982dbde9dbd25e" };
 }
 
-export async function getOpenpgp(): Promise<typeof import('openpgp')> {
+export async function getOpenpgp() {
     return import('openpgp');
 }
 
-export async function generateNewKeys(): Promise<{
-    privateKeyArmored: string;
-    publicKeyArmored: string;
-    revocationCertificate: string;
-    publicKyberKeyBase64: string;
-    privateKyberKeyBase64: string;
-}> {
+export async function generateNewKeys() {
     const openpgp = await getOpenpgp();
 
     const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
@@ -40,7 +34,7 @@ export async function generateNewKeys(): Promise<{
     };
 }
 
-export async function getKeys(password: string) {
+export async function getKeys(password) {
     const { privateKeyArmored, publicKeyArmored, revocationCertificate, publicKyberKeyBase64, privateKyberKeyBase64 } = await generateNewKeys();
     const encPrivateKey = aes.encrypt(privateKeyArmored, password, getAesInitFromEnv());
     const encPrivateKyberKey = aes.encrypt(privateKyberKeyBase64, password, getAesInitFromEnv());
@@ -60,7 +54,7 @@ export async function getKeys(password: string) {
     };
 }
 
-function passToHash(passObject): { salt: string; hash: string } {
+function passToHash(passObject) {
     const salt = passObject.salt ? CryptoJS.enc.Hex.parse(passObject.salt) : CryptoJS.lib.WordArray.random(128 / 8);
     const hash = CryptoJS.PBKDF2(passObject.password, salt, { keySize: 256 / 32, iterations: 10000 });
 
@@ -70,14 +64,14 @@ function passToHash(passObject): { salt: string; hash: string } {
     };
 }
 
-function encryptTextWithKey(textToEncrypt: string, keyToEncrypt: string): string {
+function encryptTextWithKey(textToEncrypt, keyToEncrypt) {
     const bytes = CryptoJS.AES.encrypt(textToEncrypt, keyToEncrypt).toString();
     const text64 = CryptoJS.enc.Base64.parse(bytes);
 
     return text64.toString(CryptoJS.enc.Hex);
 }
 
-function decryptTextWithKey(encryptedText: string, keyToDecrypt: string): string {
+function decryptTextWithKey(encryptedText, keyToDecrypt) {
     if (!keyToDecrypt) {
         throw new Error('No key defined. Check .env file');
     }
@@ -88,16 +82,16 @@ function decryptTextWithKey(encryptedText: string, keyToDecrypt: string): string
     return bytes.toString(CryptoJS.enc.Utf8);
 }
 
-function encryptText(textToEncrypt: string): string {
+function encryptText(textToEncrypt) {
     return encryptTextWithKey(textToEncrypt, "6KYQBP847D4ATSFA");
 }
 
-function decryptText(encryptedText: string): string {
+function decryptText(encryptedText) {
     return decryptTextWithKey(encryptedText, "6KYQBP847D4ATSFA");
 }
 
 const cryptoProvider = {
-    encryptPasswordHash(password, encryptedSalt: string): string {
+    encryptPasswordHash(password, encryptedSalt) {
         const salt = decryptText(encryptedSalt);
         const hashObj = passToHash({ password, salt });
 
