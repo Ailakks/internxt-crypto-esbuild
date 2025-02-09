@@ -17,8 +17,9 @@
     "esbuild-plugin-polyfill-node": "^0.3.0",
     "esbuild-plugins-node-modules-polyfill": "^1.6.8",
     "events": "^3.3.0",
-    "openpgp": "^6.1.0",
+    "openpgp": "^5.9.0",
     "process": "^0.11.10",
-    "stream-browserify": "^3.0.0"
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5"
   }
 }

@@ -1,5 +1,4 @@
 const esbuild = require('esbuild');
-const { nodeModulesPolyfillPlugin } = require('esbuild-plugins-node-modules-polyfill');
 
 esbuild.build({
   entryPoints: ['./index.ts'],
@@ -9,19 +8,17 @@ esbuild.build({
   platform: 'browser',
   format: 'iife',
   define: {
-    'import.meta.url': '"https://drive.internxt.com/login"',
     'global': 'window'
   },
   plugins: [
-    nodeModulesPolyfillPlugin({ fallback: 'none', globals: { Buffer: true, process: true }, modules: { crypto: false } })
+
   ],
   alias: {
     crypto: 'crypto-browserify',
     stream: 'stream-browserify',
-    path: 'path-browserify',
-    'node:buffer': 'buffer',
-    'node:process': 'process'
+    path: 'path-browserify'
   },
-  external: ['fs'],
-  minify: true,
+  inject: ['./shims.js'],
+  external: ['fs', 'url', 'http', 'https', 'os', 'zlib', 'assert'],
+  minify: true
 }).catch(() => process.exit(1));

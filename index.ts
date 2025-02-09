@@ -2,6 +2,9 @@ import CryptoJS from 'crypto-js';
 import { aes } from '@internxt/lib';
 import kemBuilder from '@dashlane/pqc-kem-kyber512-browser';
 import { Auth } from "@internxt/sdk";
+import { Buffer } from 'buffer';
+
+globalThis.Buffer = Buffer;
 
 export function getAesInitFromEnv(): { iv: string; salt: string } {
     return { iv: "d139cb9a2cd17092e79e1861cf9d7023", salt: "38dce0391b49efba88dbc8c39ebf868f0267eb110bb0012ab27dc52a528d61b1d1ed9d76f400ff58e3240028442b1eab9bb84e111d9dadd997982dbde9dbd25e" };
@@ -10,6 +13,8 @@ export function getAesInitFromEnv(): { iv: string; salt: string } {
 export async function getOpenpgp(): Promise<typeof import('openpgp')> {
     return import('openpgp');
 }
+
+console.log(process)
 
 export async function generateNewKeys(): Promise<{
     privateKeyArmored: string;
@@ -56,17 +61,6 @@ export async function getKeys(password: string) {
         },
     };
 }
-
-const generateNewKeysWithEncrypted = async (password: string) => {
-    const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await generateNewKeys();
-
-    return {
-        privateKeyArmored,
-        privateKeyArmoredEncrypted: aes.encrypt(privateKeyArmored, password, getAesInitFromEnv()),
-        publicKeyArmored,
-        revocationCertificate,
-    };
-};
 
 function passToHash(passObject): { salt: string; hash: string } {
     const salt = passObject.salt ? CryptoJS.enc.Hex.parse(passObject.salt) : CryptoJS.lib.WordArray.random(128 / 8);
