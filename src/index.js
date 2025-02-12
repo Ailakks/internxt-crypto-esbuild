@@ -1,10 +1,7 @@
-import CryptoJS from 'crypto-js';
 import { aes } from '@internxt/lib';
 import kemBuilder from '@dashlane/pqc-kem-kyber512-browser';
 import { Auth } from "@internxt/sdk";
-import { Buffer } from 'buffer';
-
-globalThis.Buffer = Buffer;
+import { pbkdf2Sync, createHash, createDecipheriv, randomBytes, createCipheriv } from 'crypto';
 
 export function getAesInitFromEnv() {
     return { iv: "d139cb9a2cd17092e79e1861cf9d7023", salt: "38dce0391b49efba88dbc8c39ebf868f0267eb110bb0012ab27dc52a528d61b1d1ed9d76f400ff58e3240028442b1eab9bb84e111d9dadd997982dbde9dbd25e" };
@@ -55,8 +52,8 @@ export async function getKeys(password) {
 }
 
 function passToHash(passObject) {
-    const salt = passObject.salt ? CryptoJS.enc.Hex.parse(passObject.salt) : CryptoJS.lib.WordArray.random(128 / 8);
-    const hash = CryptoJS.PBKDF2(passObject.password, salt, { keySize: 256 / 32, iterations: 10000 });
+    const salt = passObject.salt ? passObject.salt : randomBytes(128 / 8).toString('hex');
+    const hash = pbkdf2Sync(passObject.password, Buffer.from(salt, 'hex'), 10000, 256 / 8, 'sha1').toString('hex');
 
     return {
         salt: salt.toString(),
@@ -64,22 +61,44 @@ function passToHash(passObject) {
     };
 }
 
-function encryptTextWithKey(textToEncrypt, keyToEncrypt) {
-    const bytes = CryptoJS.AES.encrypt(textToEncrypt, keyToEncrypt).toString();
-    const text64 = CryptoJS.enc.Base64.parse(bytes);
+function getKeyAndIvFrom(secret, salt) {
+    const TRANSFORM_ROUNDS = 3;
+    const password = Buffer.concat([Buffer.from(secret, 'binary'), Buffer.from(salt)]);
+    const md5Hashes = [];
+    let digest = password;
 
-    return text64.toString(CryptoJS.enc.Hex);
-}
-
-function decryptTextWithKey(encryptedText, keyToDecrypt) {
-    if (!keyToDecrypt) {
-        throw new Error('No key defined. Check .env file');
+    for (let i = 0; i < TRANSFORM_ROUNDS; i++) {
+        md5Hashes[i] = createHash('md5').update(digest).digest();
+        digest = Buffer.concat([md5Hashes[i], password]);
     }
 
-    const reb = CryptoJS.enc.Hex.parse(encryptedText);
-    const bytes = CryptoJS.AES.decrypt(reb.toString(CryptoJS.enc.Base64), keyToDecrypt);
+    const key = Buffer.concat([md5Hashes[0], md5Hashes[1]]);
+    const iv = md5Hashes[2];
+    return { key, iv };
+}
 
-    return bytes.toString(CryptoJS.enc.Utf8);
+function encryptTextWithKey(textToEncrypt, secret) {
+    const salt = randomBytes(8);
+    const { key, iv } = getKeyAndIvFrom(secret, salt);
+
+    const cipher = createCipheriv('aes-256-cbc', key, iv);
+
+    const encrypted = Buffer.concat([cipher.update(textToEncrypt, 'utf8'), cipher.final()]);
+    const openSSLstart = Buffer.from('Salted__');
+
+    return Buffer.concat([openSSLstart, salt, encrypted]).toString('hex');
+}
+
+function decryptTextWithKey(encryptedText, secret) {
+    const cypherText = Buffer.from(encryptedText, 'hex');
+    const salt = cypherText.subarray(8, 16);
+
+    const { key, iv } = getKeyAndIvFrom(secret, salt);
+
+    const decipher = createDecipheriv('aes-256-cbc', key, iv);
+    const contentsToDecrypt = cypherText.subarray(16);
+
+    return Buffer.concat([decipher.update(contentsToDecrypt), decipher.final()]).toString('utf8');
 }
 
 function encryptText(textToEncrypt) {
@@ -94,7 +113,6 @@ const cryptoProvider = {
     encryptPasswordHash(password, encryptedSalt) {
         const salt = decryptText(encryptedSalt);
         const hashObj = passToHash({ password, salt });
-
         return encryptText(hashObj.hash);
     },
     async generateKeys(password) {
